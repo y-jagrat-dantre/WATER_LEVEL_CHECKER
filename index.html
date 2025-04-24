@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Water Bottle Fill</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #dceeff, #e0f7fa);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .bottle-container {
+      position: relative;
+      width: 120px;
+      height: 300px;
+      border: 1px solid #378CFF;
+      border-radius: 20px;
+      overflow: hidden;
+      background-color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .water-fill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, #6EB7FF, #378CFF);
+      transition: height 0.6s ease;
+    }
+
+    .percentage-label {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .slider-container {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bottle-container">
+    <div class="water-fill" id="waterFill" style="height: 50%;"></div>
+  </div>
+
+  <div class="percentage-label" id="fillText">50%</div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- the scripts for products you want to access must be added-->
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+
+  <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
+      
+      const firebaseConfig = {
+          apiKey: "AIzaSyBAppkpiENR7RyqfSVW5ZNLhHKwg8zGwfs",
+          authDomain: "esp32-cam-python.firebaseapp.com",
+          databaseURL: "https://esp32-cam-python-default-rtdb.firebaseio.com",
+          projectId: "esp32-cam-python",
+          storageBucket: "esp32-cam-python.appspot.com",
+          messagingSenderId: "660591571409",
+          appId: "1:660591571409:web:dabc298c8bf408a5cbb0f0",
+          measurementId: "G-1C5QL57K4W"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      var database = firebase.database();
+      var dataRef1 = database.ref('waterLevel/');
+      function updateFill(value) {
+        const water = document.getElementById("waterFill");
+        const label = document.getElementById("fillText");
+        water.style.height = `${value}%`;
+        label.innerText = `${value}%`;
+      }
+      
+      //fetch the data
+      dataRef1.on('value', function (getdata1) {
+          let N1 = getdata1.val();
+          updateFill(N1);
+      })
+  </script>
+
+</body>
+</html>
