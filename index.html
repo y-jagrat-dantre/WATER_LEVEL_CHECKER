@@ -3,107 +3,124 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Water Bottle Fill</title>
+  <title>Water Bottle Fill Level</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      background: linear-gradient(135deg, #dceeff, #e0f7fa);
-      font-family: 'Poppins', sans-serif;
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+
+    body {
+      background: linear-gradient(to bottom right, #74ebd5, #acb6e5);
+      font-family: 'Poppins', sans-serif;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 36px;
+      color: #01579b;
     }
 
     .bottle-container {
       position: relative;
-      width: 120px;
-      height: 300px;
-      border: 1px solid #378CFF;
-      border-radius: 20px;
+      width: 140px;
+      height: 320px;
+      border: 4px solid #0d47a1;
+      border-radius: 30px;
+      background-color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      background-color: #fff;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
 
     .water-fill {
       position: absolute;
       bottom: 0;
+      left: 0;
       width: 100%;
       height: 50%;
-      background: linear-gradient(to top, #6EB7FF, #378CFF);
+      background: linear-gradient(to top, #00c6ff, #0072ff);
       transition: height 0.6s ease;
+      border-bottom-left-radius: 26px;
+      border-bottom-right-radius: 26px;
     }
 
     .percentage-label {
-      margin-top: 20px;
-      font-size: 24px;
-      font-weight: 600;
-      color: #333;
+      margin-top: 25px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #0d47a1;
+      text-shadow: 1px 1px 2px #fff;
     }
 
-    .slider-container {
-      margin-top: 30px;
-      text-align: center;
-    }
-
-    input[type="range"] {
-      width: 300px;
+    .footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #444;
     }
   </style>
 </head>
 <body>
+
+  <h1>💧 Water Level Monitor</h1>
 
   <div class="bottle-container">
     <div class="water-fill" id="waterFill" style="height: 50%;"></div>
   </div>
 
   <div class="percentage-label" id="fillText">50%</div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- the scripts for products you want to access must be added-->
 
+  <!-- <div class="footer">🔗 Synced with Firebase Realtime Database</div> -->
+
+  <!-- Firebase Libraries -->
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyClGmWdBBiC5805nEGFKLnWv4p1qgAio40",
+      authDomain: "medicine-indicator-1fbc8.firebaseapp.com",
+      databaseURL: "https://medicine-indicator-1fbc8-default-rtdb.firebaseio.com",
+      projectId: "medicine-indicator-1fbc8",
+      storageBucket: "medicine-indicator-1fbc8.appspot.com",
+      messagingSenderId: "553743088878",
+      appId: "1:553743088878:web:594db03aa078359f7d47ff",
+      measurementId: "G-5EQ8TP9ER6"
+    };
 
-  <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
-      
-      const firebaseConfig = {
-        apiKey: "AIzaSyClGmWdBBiC5805nEGFKLnWv4p1qgAio40",
-        authDomain: "medicine-indicator-1fbc8.firebaseapp.com",
-        databaseURL: "https://medicine-indicator-1fbc8-default-rtdb.firebaseio.com",
-        projectId: "medicine-indicator-1fbc8",
-        storageBucket: "medicine-indicator-1fbc8.firebasestorage.app",
-        messagingSenderId: "553743088878",
-        appId: "1:553743088878:web:594db03aa078359f7d47ff",
-        measurementId: "G-5EQ8TP9ER6"
-      };
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
 
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
+    var dataRef = database.ref('waterLevel/');
 
-      var database = firebase.database();
-      var dataRef1 = database.ref('waterLevel/');
-      function updateFill(value) {
-        const water = document.getElementById("waterFill");
-        const label = document.getElementById("fillText");
-        water.style.height = `${value}%`;
-        label.innerText = `${value}%`;
-      }
-      
-      //fetch the data
-      dataRef1.on('value', function (getdata1) {
-          let N1 = getdata1.val();
-          updateFill(N1);
-      })
+    function updateFill(value) {
+      const water = document.getElementById("waterFill");
+      const label = document.getElementById("fillText");
+
+      value = Math.min(100, Math.max(0, parseInt(value)));
+
+      water.style.height = `${value}%`;
+      label.innerText = `${value}%`;
+    }
+
+    dataRef.on('value', function(snapshot) {
+      const level = snapshot.val();
+      updateFill(level);
+    });
   </script>
 
 </body>
